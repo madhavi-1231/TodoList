@@ -1,0 +1,89 @@
+                  TodoApp using Nodejs
+📁 Project Setup
+Step 1:
+Create a main folder called nodejs, and inside it, create two subfolders:
+frontend
+backend
+Step 2:
+In the frontend folder, create an HTML file named index.html.
+In the backend folder, create a JavaScript file named server.js.
+🎨 Frontend Development
+Step 3:
+Write the required HTML code inside index.html based on your project needs.
+Step 4:
+Add styling to your HTML page. You can link your CSS file like this:
+<link rel="stylesheet" href="style.css" />
+🔄 You had src="style.css" which is incorrect — it should be href="style.css".
+🖥️ Backend Development
+Step 5:
+Install Node.js from the official website. After installation, run the following command in the terminal to confirm:
+node -v
+Step 6:
+Navigate to the backend folder in the terminal and initialize your project:
+npm init -y
+This will create a package.json file.
+Step 7:
+Install Express:
+npm install express
+This will also create the node_modules folder and update package.json.
+Step 8:
+In server.js, set up the basic Express server:
+const express = require('express');
+const app = express();
+
+Create two routes:
+
+A default route / to get all items
+A POST route /add-item to add items
+🔗 Connecting Frontend to Backend
+Step 9:
+In index.html, use the fetch() API to send data to the backend.
+Example:
+fetch('http://localhost:3000/add-item', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ inputVal })
+});
+Step 10:
+To allow requests from the frontend, install and use CORS:
+npm install cors
+In your server:
+const cors = require('cors');
+app.use(cors());
+app.use(express.json());
+🗄️ Database Setup
+Step 11:
+Open MySQL Workbench:
+Create a database (schema)
+Inside it, create a table with columns like id, description, and completed
+Example SQL:
+CREATE TABLE todos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  description VARCHAR(255),
+  completed BOOLEAN DEFAULT FALSE
+);
+Step 12:
+In your server.js, install and import MySQL2:
+npm install mysql2
+Then connect to your database:
+const mysql = require('mysql2');
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'your_password',
+  database: 'your_database_name'
+});
+📥 Inserting and Fetching Data
+Step 13:
+In the /add-item route, insert the data from the frontend into the MySQL table using a parameterized query.
+Step 14:
+To retrieve data from the table, use:
+db.query('SELECT * FROM todos', (err, results) => {
+  res.json(results);
+});
+🚀 How to Run the Project
+Run the backend server:
+node server.js
+(Optional: Use nodemon for auto-reload)
+npx nodemon server.js
+Open frontend/index.html in your browser to test the interface.
