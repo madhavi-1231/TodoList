@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nodejs Todo</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Todo List</h2>
+
+    <div class="input-group mb-3">
+      <input id="inputfield" class="form-control" placeholder="Enter task" />
+      <div class="input-group-append">
+        <button class="btn btn-primary" onclick="addTodo()">Add Task</button>
+      </div>
+    </div>
+
+    <ul id="todo-list" class="list- group"></ul>
+  </div>
+
+  <script>
+    let todos = [];
+
+    // ✅ Render all todos
+    function renderTodos() {
+      const list = document.getElementById('todo-list');
+      list.innerHTML = '';
+      todos.forEach((todo, index) => {
+        const li = document.createElement('li');
+        li.className = 'todo-item list-group-item d-flex justify-content-between align-items-center';
+
+        if (todo.editing) {
+          li.innerHTML = `
+            <input class="form-control edit-input mr-3" type="text" value="${todo.text}" onkeyup="updateTodo(event, ${index})" />
+            <div>
+              <button class="btn btn-success btn-sm" onclick="saveTodo(${index})">Save</button>
+            </div>
+          `;
+        } else {
+          li.innerHTML = `
+            <span>${todo.text}</span>
+            <div>
+              <button class="btn btn-warning btn-sm" onclick="editTodo(${index})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteTodo(${index})">Delete</button>
+            </div>
+          `;
+        }
+
+        list.appendChild(li);
+      });
+    }
+
+    // ✅ Add new todo
+    function addTodo() {
+      const input = document.getElementById('inputfield');
+      const text = input.value.trim();
+
+      if (text !== '') {
+        // Update frontend
+        todos.push({ text: text, editing: false });
+        renderTodos();
+
+        // Clear input field
+        input.value = '';
+
+        // Send to backend
+        fetch('http://localhost:3000/add-item', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inputVal: text }),
+        }).catch(err => console.error("Error sending to server:", err));
+      }
+    }
+
+    // ✅ Delete a todo
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      renderTodos();
+    }
+
+    // ✅ Enter edit mode
+    function editTodo(index) {
+      todos[index].editing = true;
+      renderTodos();
+    }
+
+    // ✅ Save edited todo
+    function saveTodo(index) {
+      const input = document.querySelectorAll('.edit-input')[index];
+      const newText = input.value.trim();
+      if (newText !== '') {
+        todos[index].text = newText;
+        todos[index].editing = false;
+        renderTodos();
+      }
+    }
+
+    // ✅ Update local value on typing
+    function updateTodo(event, index) {
+      todos[index].text = event.target.value;
+    }
+
+    // ✅ Load initial todos from server
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('http://localhost:3000', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        const serverTodos = await response.json();
+        todos = serverTodos.map(item => ({ text: item.itemDescription, editing: false }));
+        renderTodos();
+      } catch (err) {
+        console.error("Error fetching tasks from server:", err);
+      }
+    });
+  </script>
+</body>
+</html>
